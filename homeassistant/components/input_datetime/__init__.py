@@ -33,6 +33,7 @@ DOMAIN = "input_datetime"
 
 CONF_HAS_DATE = "has_date"
 CONF_HAS_TIME = "has_time"
+CONF_ENABLE_SECONDS = "enable_seconds"
 CONF_INITIAL = "initial"
 
 DEFAULT_TIME = py_datetime.time(0, 0, 0)
@@ -63,6 +64,7 @@ STORAGE_FIELDS: VolDictType = {
     vol.Required(CONF_NAME): vol.All(str, vol.Length(min=1)),
     vol.Optional(CONF_HAS_DATE, default=False): cv.boolean,
     vol.Optional(CONF_HAS_TIME, default=False): cv.boolean,
+    vol.Optional(CONF_ENABLE_SECONDS, default=False): cv.boolean,
     vol.Optional(CONF_ICON): cv.icon,
     vol.Optional(CONF_INITIAL): cv.string,
 }
@@ -113,6 +115,7 @@ CONFIG_SCHEMA = vol.Schema(
                     vol.Optional(CONF_NAME): cv.string,
                     vol.Optional(CONF_HAS_DATE, default=False): cv.boolean,
                     vol.Optional(CONF_HAS_TIME, default=False): cv.boolean,
+                    vol.Optional(CONF_ENABLE_SECONDS, default=False): cv.boolean,
                     vol.Optional(CONF_ICON): cv.icon,
                     vol.Optional(CONF_INITIAL): cv.string,
                 },
@@ -219,7 +222,9 @@ class DateTimeStorageCollection(collection.DictStorageCollection):
 class InputDatetime(collection.CollectionEntity, RestoreEntity):
     """Representation of a datetime input."""
 
-    _unrecorded_attributes = frozenset({ATTR_EDITABLE, CONF_HAS_DATE, CONF_HAS_TIME})
+    _unrecorded_attributes = frozenset(
+        {ATTR_EDITABLE, CONF_HAS_DATE, CONF_HAS_TIME, CONF_ENABLE_SECONDS}
+    )
 
     _attr_should_poll = False
     editable: bool
@@ -314,6 +319,12 @@ class InputDatetime(collection.CollectionEntity, RestoreEntity):
         return self._config[CONF_HAS_TIME]
 
     @property
+    def enable_seconds(self) -> bool:
+        """Return True if entity has seconds."""
+        # return self._config[CONF_ENABLE_SECONDS]
+        return self._config.get(CONF_ENABLE_SECONDS, False)
+
+    @property
     def icon(self):
         """Return the icon to be used for this entity."""
         return self._config.get(CONF_ICON)
@@ -338,6 +349,7 @@ class InputDatetime(collection.CollectionEntity, RestoreEntity):
         return {
             CONF_HAS_DATE: self.has_date,
             CONF_HAS_TIME: self.has_time,
+            CONF_ENABLE_SECONDS: self.enable_seconds,
         }
 
     @property
